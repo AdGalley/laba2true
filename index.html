@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="js/vue.min.js"></script>
+  <script defer src="js/main.js"></script>
+  <link rel="stylesheet" href="css/main.css">
+  <title>Notes App</title>
+</head>
+<body>
+  <div id="app">
+    <h1>Notes App</h1>
+    <div class="columns">
+      <column 
+        :title="'To Do (max 3)'" 
+        :cards="columns[0]" 
+        :max-cards="3"
+        :is-locked="isFirstColumnLocked"
+        :column-index="0"
+        @update-item="handleItemUpdate"
+        @move-card="handleMoveCard"
+        @add-card="handleAddCard"
+        @delete-card="handleDeleteCard">
+      </column>
+      <column 
+        :title="'In Progress (max 5)'" 
+        :cards="columns[1]" 
+        :max-cards="5"
+        :is-locked="false"
+        :column-index="1"
+        @update-item="handleItemUpdate"
+        @move-card="handleMoveCard"
+        @add-card="handleAddCard"
+        @delete-card="handleDeleteCard">
+      </column>
+      <column 
+        :title="'Done (unlimited)'" 
+        :cards="columns[2]" 
+        :max-cards="null"
+        :is-locked="false"
+        :column-index="2"
+        @update-item="handleItemUpdate"
+        @move-card="handleMoveCard"
+        @add-card="handleAddCard"
+        @delete-card="handleDeleteCard">
+      </column>
+    </div>
+     <button @click="cleanAll" class="clean-all-btn">
+    Clean All Notes
+  </button>
+  </div>
+</body>
+</html>
