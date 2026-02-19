@@ -1,22 +1,20 @@
+let eventBus = new Vue();
 Vue.component('card', {
   props: {
     cardData: {
       type: Object,
       required: true
     },
-
     columnIndex: {
       type: Number,
       required: true
     },
-
     isLocked: {
       type: Boolean,
       required: false,
       default: false
     }
   },
-
   template: `
     <div class="card" :class="{ 'locked': isLocked && columnIndex === 0 }">
       <h3>{{ cardData.title }}</h3>
@@ -36,36 +34,35 @@ Vue.component('card', {
       </ul>
       
       <div class="card-info">
-        <p>Completion: {{ completionPercentage }}%</p>
+        <p>Завершение: {{ completionPercentage }}%</p>
         <p v-if="cardData.completedAt" class="completed-date">
-          Completed: {{ cardData.completedAt }}
+          Завершено: {{ cardData.completedAt }}
         </p>
       </div>
       
       <div class="card-actions" v-if="!isLocked || columnIndex !== 0">
         <button 
           v-if="columnIndex === 0 && canAddItems"
-          @click="$emit('add-item', cardData.id)"
+          @click="addItem"
           :disabled="cardData.items.length >= 5"
         >
-          Add Item
+          Добавить элемент
         </button>
         <button 
           v-if="columnIndex < 2"
-          @click="$emit('move-card', cardData.id, columnIndex)"
+          @click="moveCard"
         >
-          Move to {{ columnIndex === 0 ? 'Progress' : 'Done' }}
+          Переместить в {{ columnIndex === 0 ? 'В процессе' : 'Готово' }}
         </button>
         <button 
           v-if="columnIndex === 0"
-          @click="$emit('delete-card', cardData.id)"
+          @click="deleteCard"
         >
-          Delete
+          Удалить
         </button>
       </div>
     </div>
   `,
-
   computed: {
     completionPercentage() {
       if (this.cardData.items.length === 0) return 0;
@@ -76,13 +73,20 @@ Vue.component('card', {
       return this.cardData.items.length < 5;
     }
   },
-
   methods: {
     onItemChange(itemIndex) {
-      this.$emit('update-item', this.cardData, this.columnIndex, itemIndex);
+      eventBus.$emit('update-item', this.cardData, this.columnIndex, itemIndex);
+    },
+    addItem() {
+      eventBus.$emit('add-item', this.cardData.id, this.columnIndex);
+    },
+    moveCard() {
+      eventBus.$emit('move-card', this.cardData.id, this.columnIndex);
+    },
+    deleteCard() {
+      eventBus.$emit('delete-card', this.cardData.id);
     }
-  },
-
+  }
 });
 
 Vue.component('column', {
@@ -91,76 +95,71 @@ Vue.component('column', {
       type: String,
       required: true
     },
-
     cards: {
       type: Array,
       required: true
     },
-
     maxCards: {
       type: Number,
       required: false
     },
-
     isLocked: {
       type: Boolean,
       required: true
     },
-
     columnIndex: {
       type: Number,
       required: true
     }
   },
-
   template: `
     <div class="column" :class="{ 'locked': isLocked }">
       <h2>{{ title }}</h2>
-      <p class="card-count">Cards: {{ cards.length }}{{ maxCards ? '/' + maxCards : '' }}</p>
+      <p class="card-count">Карточки: {{ cards.length }}{{ maxCards ? '/' + maxCards : '' }}</p>
       
-      <div v-if="isLocked" class="lock-message">Column locked - wait for Progress column</div>
+      <div v-if="isLocked" class="lock-message">Столбец заблокирован — дождитесь столбца «В процессе»</div>
       
-      <div v-if="cards.length === 0" class="no-cards">No cards yet</div>
+      <div v-if="cards.length === 0" class="no-cards">Пока нет карточек</div>
       
       <card
         v-for="card in cards"
         :key="card.id"
         :card-data="card"
         :column-index="columnIndex"
-        :is-locked="isLocked"
-        @add-item="$emit('add-card', $event, columnIndex)"
-        @move-card="$emit('move-card', $event, columnIndex)"
-        @update-item="$emit('update-item', $event, columnIndex, $event)"
-        @delete-card="$emit('delete-card', $event)"
-      ></card>
+        :is-locked="isLocked">
+      </card>
       
       <button 
         v-if="!isLocked && (!maxCards || cards.length < maxCards)"
-        @click="$emit('add-card', null, columnIndex)"
+        @click="addCard"
         class="add-card-btn"
       >
-        + Add Card
+        + Добавить карточку
       </button>
       
       <p v-if="maxCards && cards.length >= maxCards" class="max-reached">
-        Maximum cards reached
+        Достигнуто максимальное количество карточек
       </p>
     </div>
-  `
+  `,
+  methods: {
+    addCard() {
+      eventBus.$emit('add-card', null, this.columnIndex);
+    }
+  }
 });
 
 let app = new Vue({
   el: '#app',
-  data: {
+   data: {
     columns: [
-      [], // To Do
-      [], // In Progress
-      []  // Done
+      [], // Нужно сделать
+      [], // В процессе
+      []  // Готово
     ],
     nextCardId: 1,
     nextItemId: 1
   },
-
   computed: {
     isFirstColumnLocked() {
       const secondColumn = this.columns[1];
@@ -181,7 +180,6 @@ let app = new Vue({
       return false;
     }
   },
-  
   methods: {
     getCompletionPercentage(card) {
       if (!card.items || card.items.length === 0) return 0;
@@ -191,12 +189,12 @@ let app = new Vue({
     
     handleAddCard(cardId, columnIndex) {
       if (cardId === null) {
-        const title = prompt('Enter card title:');
+        const title = prompt('Введите заголовок карточки:');
         if (!title) return;
         
         const items = [];
         for (let i = 0; i < 3; i++) {
-          const itemText = prompt(`Enter item ${i + 1} (min 3 items):`);
+          const itemText = prompt(`Введите элемент ${i + 1} (минимум 3 элемента):`);
           if (itemText) {
             items.push({
               id: this.nextItemId++,
@@ -207,7 +205,7 @@ let app = new Vue({
         }
         
         if (items.length < 3) {
-          alert('Card must have at least 3 items!');
+          alert('Карточка должна содержать минимум 3 элемента!');
           return;
         }
         
@@ -225,11 +223,11 @@ let app = new Vue({
         if (!card) return;
         
         if (card.items.length >= 5) {
-          alert('Maximum 5 items per card!');
+          alert('Максимум 5 элементов в карточке!');
           return;
         }
         
-        const itemText = prompt('Enter new item:');
+        const itemText = prompt('Введите новый элемент:');
         if (itemText) {
           card.items.push({
             id: this.nextItemId++,
@@ -240,14 +238,14 @@ let app = new Vue({
         }
       }
     },
-
+    
     cleanAll() {
-      if (confirm('Are you sure you want to delete ALL cards? This cannot be undone!')) {
-      this.columns = [[], [], []]; 
-      this.nextCardId = 1; 
-      this.nextItemId = 1;
-      this.saveToLocalStorage(); 
-       }
+      if (confirm('Вы уверены, что хотите удалить ВСЕ карточки? Это действие нельзя отменить!')) {
+        this.columns = [[], [], []];
+        this.nextCardId = 1;
+        this.nextItemId = 1;
+        this.saveToLocalStorage();
+      }
     },
     
     handleMoveCard(cardId, fromColumnIndex) {
@@ -260,7 +258,7 @@ let app = new Vue({
       if (fromColumnIndex === 0) {
         if (percentage > 50 && percentage < 100) {
           if (this.columns[1].length >= 5) {
-            alert('Second column is full! Cannot move card.');
+            alert('Второй столбец заполнен! Невозможно переместить карточку.');
             return;
           }
           this.columns[1].push(card);
@@ -270,7 +268,7 @@ let app = new Vue({
           this.columns[2].push(card);
           this.columns[0].splice(cardIndex, 1);
         } else {
-          alert('Complete more than 50% to move to second column!');
+          alert('Завершите более 50%, чтобы переместить во второй столбец!');
           return;
         }
       } else if (fromColumnIndex === 1) {
@@ -279,7 +277,7 @@ let app = new Vue({
           this.columns[2].push(card);
           this.columns[1].splice(cardIndex, 1);
         } else {
-          alert('Complete 100% to move to Done column!');
+          alert('Завершите на 100%, чтобы переместить в столбец «Готово»!');
           return;
         }
       }
@@ -317,7 +315,7 @@ let app = new Vue({
     },
     
     handleDeleteCard(cardId) {
-      if (!confirm('Delete this card?')) return;
+      if (!confirm('Удалить эту карточку?')) return;
       
       const columnIndex = this.columns.findIndex(col => 
         col.some(c => c.id === cardId)
@@ -367,6 +365,26 @@ let app = new Vue({
     }
   },
   mounted() {
+    eventBus.$on('add-card', (cardId, columnIndex) => {
+      this.handleAddCard(cardId, columnIndex);
+    });
+    
+    eventBus.$on('move-card', (cardId, columnIndex) => {
+      this.handleMoveCard(cardId, columnIndex);
+    });
+    
+    eventBus.$on('update-item', (cardData, columnIndex, itemIndex) => {
+      this.handleItemUpdate(cardData, columnIndex, itemIndex);
+    });
+    
+    eventBus.$on('delete-card', (cardId) => {
+      this.handleDeleteCard(cardId);
+    });
+    
+    eventBus.$on('add-item', (cardId, columnIndex) => {
+      this.handleAddCard(cardId, columnIndex);
+    });
+    
     this.loadFromLocalStorage();
   }
 });
