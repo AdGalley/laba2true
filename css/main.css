@@ -20,6 +20,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   gap: 20px;
+  border-radius: 6%;
 }
 
 .column {
@@ -27,6 +28,8 @@ h1 {
   background-color: #292929;
   padding: 15px;
   min-height: 500px;
+  border-radius: 6%;
+
 }
 
 .column.locked {
@@ -66,6 +69,7 @@ h1 {
   background-color: rgb(67, 65, 65);
   padding: 15px;
   margin-bottom: 15px;
+  border-radius: 6%;
 }
 
 .card.locked {
@@ -181,4 +185,5 @@ h1 {
   font-size: 16px;
   font-weight: bold;
   transition: background-color 0.3s;
+  border-radius: 4%;
 }
