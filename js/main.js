@@ -196,7 +196,7 @@ let app = new Vue({
       </button>
     </div>
   `,
-  
+
   computed: {
     isFirstColumnLocked() {
       const secondColumn = this.columns[1];
@@ -209,7 +209,7 @@ let app = new Vue({
       const firstColumn = this.columns[0];
       for (let card of firstColumn) {
         const percentage = this.getCompletionPercentage(card);
-        if (percentage > 50) {
+        if (percentage >= 50) {
           return true;
         }
       }
@@ -291,7 +291,7 @@ let app = new Vue({
       const percentage = this.getCompletionPercentage(card);
       
       if (fromColumnIndex === 0) {
-        if (percentage > 50 && percentage < 100) {
+        if (percentage >= 50 && percentage < 100) {
           if (this.columns[1].length >= 5) {
             alert('Второй столбец заполнен! Невозможно переместить карточку.');
             return;
@@ -332,7 +332,7 @@ let app = new Vue({
           setTimeout(() => {
             this.handleMoveCard(cardData.id, 0);
           }, 500);
-        } else if (percentage > 50) {
+        } else if (percentage >= 50) {
           if (this.columns[1].length < 5) {
             setTimeout(() => {
               this.handleMoveCard(cardData.id, 0);
