@@ -25,7 +25,7 @@ Vue.component('card', {
             type="checkbox" 
             v-model="item.completed"
             @change="onItemChange(index)"
-            :disabled="isLocked && columnIndex === 0"
+            :disabled="(isLocked && columnIndex === 0) || columnIndex === 2"
           >
           <span :class="{ 'completed': item.completed }">
             {{ item.text }}
@@ -130,10 +130,10 @@ Vue.component('column', {
       </card>
       
       <button 
-        v-if="!isLocked && (!maxCards || cards.length < maxCards)"
+        v-if="columnIndex === 0 && !isLocked && (!maxCards || cards.length < maxCards)"
         @click="addCard"
         class="add-card-btn"
-      >
+        >
         + Добавить карточку
       </button>
       
