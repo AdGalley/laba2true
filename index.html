@@ -10,37 +10,6 @@
 </head>
 <body>
   <div id="app">
-    <h1>Заметочки</h1>
-    
-    <div class="columns">
-      <column 
-        :title="'Нужно сделать'" 
-        :cards="columns[0]" 
-        :max-cards="3"
-        :is-locked="isFirstColumnLocked"
-        :column-index="0">
-      </column>
-      
-      <column 
-        :title="'В процессе'" 
-        :cards="columns[1]" 
-        :max-cards="5"
-        :is-locked="false"
-        :column-index="1">
-      </column>
-      
-      <column 
-        :title="'Готово'" 
-        :cards="columns[2]" 
-        :max-cards="null"
-        :is-locked="false"
-        :column-index="2">
-      </column>
-    </div>
-    
-    <button @click="cleanAll" class="clean-all-btn">
-      Очистить
-    </button>
   </div>
 </body>
 </html>

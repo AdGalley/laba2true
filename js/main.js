@@ -160,6 +160,43 @@ let app = new Vue({
     nextCardId: 1,
     nextItemId: 1
   },
+
+  template: `
+    <div>
+      <h1>Заметочки</h1>
+      
+      <div class="columns">
+        <column 
+          :title="'Нужно сделать'" 
+          :cards="columns[0]" 
+          :max-cards="3"
+          :is-locked="isFirstColumnLocked"
+          :column-index="0">
+        </column>
+        
+        <column 
+          :title="'В процессе'" 
+          :cards="columns[1]" 
+          :max-cards="5"
+          :is-locked="false"
+          :column-index="1">
+        </column>
+        
+        <column 
+          :title="'Готово'" 
+          :cards="columns[2]" 
+          :max-cards="null"
+          :is-locked="false"
+          :column-index="2">
+        </column>
+      </div>
+      
+      <button @click="cleanAll" class="clean-all-btn">
+        Очистить «Готово»
+      </button>
+    </div>
+  `,
+  
   computed: {
     isFirstColumnLocked() {
       const secondColumn = this.columns[1];
@@ -240,12 +277,10 @@ let app = new Vue({
     },
     
     cleanAll() {
-      if (confirm('Вы уверены, что хотите удалить ВСЕ карточки? Это действие нельзя отменить!')) {
-        this.columns = [[], [], []];
-        this.nextCardId = 1;
-        this.nextItemId = 1;
-        this.saveToLocalStorage();
-      }
+      if (confirm('Вы уверены, что хотите удалить все карточки из столбца «Готово»? Это действие нельзя отменить!')) {
+      this.columns[2] = []; 
+      this.saveToLocalStorage();
+     }
     },
     
     handleMoveCard(cardId, fromColumnIndex) {
